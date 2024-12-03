@@ -1,0 +1,54 @@
+% Load Image
+img = imread('Fig0338(a).tif'); % Replace 'Fig0338(a).tif' with your image file
+img_gray = im2double(img); % Convert to double precision for processing
+
+% Averaging Blur
+kernel_size = 5; % Define kernel size
+avg_kernel = ones(kernel_size) / (kernel_size^2);
+blur_avg = imfilter(img_gray, avg_kernel, 'same');
+
+% Gaussian Blur
+sigma = 2; % Standard deviation
+gauss_kernel = fspecial('gaussian', [kernel_size kernel_size], sigma);
+blur_gauss = imfilter(img_gray, gauss_kernel, 'same');
+
+% Motion Blur
+motion_kernel = fspecial('motion', 20, 45); % Length and angle
+blur_motion = imfilter(img_gray, motion_kernel, 'same');
+
+% Display Blurred Images
+figure(1);
+subplot(2,2,1), imshow(img_gray), title('Original Image');
+subplot(2,2,2), imshow(blur_avg), title('Averaging Blur');
+subplot(2,2,3), imshow(blur_gauss), title('Gaussian Blur');
+subplot(2,2,4), imshow(blur_motion), title('Motion Blur');
+
+% Apply Deblurring (Wiener Filter for simplicity)
+noise_var = 0.01; % Assume noise variance
+deblur_avg_wiener = deconvwnr(blur_avg, avg_kernel, noise_var);
+deblur_gauss_wiener = deconvwnr(blur_gauss, gauss_kernel, noise_var);
+deblur_motion_wiener = deconvwnr(blur_motion, motion_kernel, noise_var);
+
+% Laplacian Mask (for edge enhancement)
+laplacianMask = [-1 -1 -1; -1  8 -1; -1 -1 -1];
+scale = 1; % Scaling factor for Laplacian
+
+% Apply Laplacian filtering to deblurred results
+deblur_avg_lap = laplacianFiltering(deblur_avg_wiener, laplacianMask, scale);
+deblur_gauss_lap = laplacianFiltering(deblur_gauss_wiener, laplacianMask, scale);
+deblur_motion_lap = laplacianFiltering(deblur_motion_wiener, laplacianMask, scale);
+
+% Display Deblurring Results for Averaging Blur
+figure(2);
+subplot(1,2,1), imshow(blur_avg), title('Averaging Blurred Image');
+subplot(1,2,2), imshow(deblur_avg_lap), title('Deblurred: Wiener + Laplacian Filter');
+
+% Display Deblurring Results for Gaussian Blur
+figure(3);
+subplot(1,3,1), imshow(blur_gauss), title('Gaussian Blurred Image');
+subplot(1,3,2), imshow(deblur_gauss_lap), title('Deblurred: Wiener + Laplacian Filter');
+
+% Display Deblurring Results for Motion Blur
+figure(4);
+subplot(1,3,1), imshow(blur_motion), title('Motion Blurred Image');
+subplot(1,3,2), imshow(deblur_motion_lap), title('Deblurred: Wiener + Laplacian Filter');

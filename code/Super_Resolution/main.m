@@ -46,5 +46,5 @@ zip(zipFileName, outputFolder);
 zipFileName2 = 'SuperResolution_polluted.zip';
 zip(zipFileName2, outputFolder2);
 
-% Final check if the files have been successfully zipped
 disp(['All processed images have been saved and zipped into: ', zipFileName]);
+disp(['All processed images have been saved and zipped into: ', zipFileName2]);
