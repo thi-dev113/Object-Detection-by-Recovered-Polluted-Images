@@ -1,7 +1,7 @@
 % Load Image
 clc, clear
-img = imread('Fig0338(a).tif'); % Replace 'Fig0338(a).tif' with your image file
-img_gray = im2double(img); % Convert to double precision for processing
+img = imread('Fig0338(a).tif'); 
+img_gray = im2double(img);
 
 % Folder to save results
 output_dir = 'recovered_images';
