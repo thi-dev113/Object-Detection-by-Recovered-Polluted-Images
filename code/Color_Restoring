@@ -1,0 +1,91 @@
+>> % Read the new image
+original_image = imread('old_image.jpeg');
+
+% Convert to HSV
+hsv_image = rgb2hsv(original_image);
+
+% Convert to Grayscale
+gray_RGB = rgb2gray(original_image);
+gray_hsv = rgb2gray(hsv_image);
+
+% Display the original, HSV, and grayscale images
+figure(1);
+subplot(2, 2, 1), imshow(original_image), title('Original Image');
+subplot(2, 2, 2), imshow(hsv_image), title('HSV Image');
+subplot(2, 2, 3), imshow(gray_RGB), title('Grayscale from RGB');
+subplot(2, 2, 4), imshow(gray_hsv), title('Grayscale from HSV');
+
+% Pseudo-color processing
+gray_to_ind = gray2ind(gray_RGB, 256);
+pseudo_color = ind2rgb(gray_to_ind, colormap(hsv(256)));
+
+% Display pseudo-color image
+figure(2);
+subplot(1, 2, 1), imshow(original_image), title('Original Image');
+subplot(1, 2, 2), imshow(pseudo_color), title('Pseudo-Color Image');
+
+
+% Brightness adjustment
+brightened_image = im2double(original_image);
+brightened_image(:, :, 1) = brightened_image(:, :, 1) + 0.2; % Adjust red channel
+brightened_image(:, :, 2) = brightened_image(:, :, 2) + 0.2; % Adjust green channel
+brightened_image(:, :, 3) = brightened_image(:, :, 3) + 0.2; % Adjust blue channel
+
+% Histogram Equalization
+equalized_image = original_image;
+equalized_image(:, :, 1) = histeq(original_image(:, :, 1)); % Red channel
+equalized_image(:, :, 2) = histeq(original_image(:, :, 2)); % Green channel
+equalized_image(:, :, 3) = histeq(original_image(:, :, 3)); % Blue channel;
+
+% Display results
+figure(3);
+subplot(1, 3, 1), imshow(original_image), title('Original Image');
+subplot(1, 3, 2), imshow(brightened_image), title('Brightened Image');
+subplot(1, 3, 3), imshow(equalized_image), title('Equalized Image');
+
+
+% Define the target color and threshold
+target_color = squeeze(original_image(50, 50, :)); % Sample pixel value for segmentation
+threshold = 40; % Adjust this threshold for better results
+
+% Initialize the segmented image
+segmented_image = original_image;
+
+% Loop through each pixel to apply segmentation
+for i = 1:size(original_image, 1)
+    for j = 1:size(original_image, 2)
+        pixel = squeeze(original_image(i, j, :)); % Extract the current pixel value as a vector
+        % Compute the Euclidean distance to the target color
+        if norm(double(pixel) - double(target_color)) > threshold
+            segmented_image(i, j, :) = 0; % Set non-matching pixels to black
+        end
+    end
+end
+
+% Display the segmented image
+figure;
+imshow(segmented_image);
+title('Segmented Image');
+>> % Convert to HSV
+hsv_segmented = rgb2hsv(original_image);
+hue = hsv_segmented(:, :, 1);
+
+% Define hue range for segmentation
+hue_target = 0.5; % Example: green
+hue_threshold = 0.1;
+mask = abs(hue - hue_target) < hue_threshold;
+
+% Apply the mask
+segmented_hsv_image = original_image;
+segmented_hsv_image(repmat(~mask, [1, 1, 3])) = 0;
+
+% Display segmentation results
+figure(4);
+subplot(1, 2, 1), imshow(segmented_image), title('RGB Segmentation');
+subplot(1, 2, 2), imshow(segmented_hsv_image), title('HSV Segmentation');
+>> imwrite(brightened_image, 'brightened_image.jpeg');
+imwrite(equalized_image, 'equalized_image.jpeg');
+imwrite(segmented_image, 'segmented_image_rgb.jpeg');
+imwrite(segmented_hsv_image, 'segmented_image_hsv.jpeg');
+
+
